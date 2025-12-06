@@ -1,57 +1,71 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 st.title("범죄 지역 찾기")
 
 st.write("이 사이트의 목적은 범죄가 가장 많이 발생한 곳과 가장 적게 발생한 곳을 찾는 것입니다.")
 
-# 데이터 업로드 또는 샘플 데이터 사용
-st.sidebar.header("데이터 설정")
-uploaded_file = st.sidebar.file_uploader("범죄 데이터 CSV 파일 업로드", type=['csv'])
+# 데이터 파일 경로
+data_path = "data/경찰청_범죄 발생 지역별 통계_20231231.csv"
 
-# 샘플 데이터 생성 함수
-def create_sample_data():
-    import random
-    regions = ['서울 강남구', '서울 강북구', '서울 종로구', '서울 마포구', '부산 해운대구', 
-               '부산 중구', '인천 남동구', '대구 수성구', '광주 광산구', '대전 유성구']
-    crime_types = ['절도', '폭행', '사기', '살인', '강도', '성범죄', '마약', '교통범죄']
+# 데이터 로드 함수
+@st.cache_data
+def load_data():
+    """CSV 파일을 읽고 변환하는 함수"""
+    encodings = ['cp949', 'euc-kr', 'utf-8', 'utf-8-sig']
     
-    data = []
-    for region in regions:
-        for crime_type in crime_types:
-            count = random.randint(0, 150)
-            if count > 0:
-                data.append({
-                    '지역': region,
-                    '범죄유형': crime_type,
-                    '발생건수': count
-                })
+    for encoding in encodings:
+        try:
+            # CSV 파일 읽기
+            df_raw = pd.read_csv(data_path, encoding=encoding)
+            
+            # 첫 번째 컬럼: 범죄대분류, 두 번째 컬럼: 범죄중분류
+            # 나머지 컬럼들: 각 지역별 발생 건수
+            crime_category_col = df_raw.columns[0]  # 범죄대분류
+            crime_type_col = df_raw.columns[1]      # 범죄중분류
+            
+            # 데이터 변환: 피벗 테이블을 long format으로 변환
+            data_list = []
+            
+            for idx, row in df_raw.iterrows():
+                crime_category = row[crime_category_col]
+                crime_type = row[crime_type_col]
+                
+                # 범죄 유형: 범죄대분류 + 범죄중분류 (또는 범죄중분류만)
+                crime_name = f"{crime_category} - {crime_type}" if pd.notna(crime_category) else str(crime_type)
+                
+                # 나머지 컬럼들을 순회하며 지역별 발생 건수 수집
+                for col in df_raw.columns[2:]:
+                    region_name = str(col).strip()
+                    
+                    if pd.notna(row[col]) and str(row[col]).strip() != '':
+                        try:
+                            count = int(row[col])
+                            if count > 0:  # 0보다 큰 값만 저장
+                                data_list.append({
+                                    '지역': region_name,
+                                    '범죄유형': crime_name,
+                                    '발생건수': count
+                                })
+                        except (ValueError, TypeError):
+                            continue
+            
+            df = pd.DataFrame(data_list)
+            
+            if len(df) > 0:
+                return df
+        except Exception as e:
+            continue
     
-    return pd.DataFrame(data)
+    return pd.DataFrame()
 
 # 데이터 로드
-if uploaded_file is not None:
-    try:
-        df = pd.read_csv(uploaded_file)
-        # 컬럼명 확인 및 표준화
-        if '지역' not in df.columns or '범죄유형' not in df.columns or '발생건수' not in df.columns:
-            st.error("CSV 파일은 '지역', '범죄유형', '발생건수' 컬럼을 포함해야 합니다.")
-            st.info("샘플 데이터를 사용합니다.")
-            df = create_sample_data()
-    except Exception as e:
-        st.error(f"파일 읽기 오류: {e}")
-        st.info("샘플 데이터를 사용합니다.")
-        df = create_sample_data()
-else:
-    st.info("📁 CSV 파일을 업로드하거나 샘플 데이터를 사용하세요.")
-    df = create_sample_data()
+df = load_data()
 
-# 데이터 확인
-if st.sidebar.checkbox("데이터 미리보기"):
-    st.subheader("원본 데이터")
-    st.dataframe(df, use_container_width=True)
+if df.empty:
+    st.error("데이터를 불러올 수 없습니다.")
+    st.stop()
 
 # 메인 분석 섹션
 st.header("📊 지역별 범죄 발생 분석")
