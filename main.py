@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 
 st.title("범죄 지역 찾기")
+st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
+st.write("범죄 데이터의 자료는 경찰청에서 제공하는 공공데이터입니다.")
 
 # 선택 정렬 알고리즘 구현
 def selection_sort(data, key=None, reverse=False):
@@ -143,8 +145,6 @@ if df.empty:
 
 # 메인 분석 섹션
 st.header("📊 지역별 범죄 발생 분석")
-st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
-st.write("범죄 데이터의 자료는 경찰청에서 제공하는 공공데이터입니다.")
 
 # 1. 가장 많이 발생한 지역-범죄 조합
 st.subheader("🔥 가장 많이 발생한 지역-범죄 조합 Top 10")
