@@ -4,7 +4,81 @@ import plotly.express as px
 
 st.title("범죄 지역 찾기")
 
-st.write("이 사이트의 목적은 범죄가 가장 많이 발생한 곳과 가장 적게 발생한 곳을 찾는 것입니다.")
+# 선택 정렬 알고리즘 구현
+def selection_sort(data, key=None, reverse=False):
+    """
+    선택 정렬 알고리즘
+    Args:
+        data: 정렬할 리스트 또는 pandas DataFrame
+        key: 정렬 기준이 되는 키 함수 (DataFrame의 경우 컬럼명)
+        reverse: True면 내림차순, False면 오름차순
+    Returns:
+        정렬된 리스트 또는 DataFrame
+    """
+    if isinstance(data, pd.DataFrame):
+        # DataFrame인 경우
+        data_list = data.to_dict('records')
+        n = len(data_list)
+        
+        for i in range(n):
+            # 현재 위치부터 끝까지 최소값(또는 최대값) 찾기
+            extreme_idx = i
+            for j in range(i + 1, n):
+                if key:
+                    current_val = data_list[j][key]
+                    extreme_val = data_list[extreme_idx][key]
+                else:
+                    current_val = data_list[j]
+                    extreme_val = data_list[extreme_idx]
+                
+                if reverse:
+                    # 내림차순: 더 큰 값을 찾음
+                    if current_val > extreme_val:
+                        extreme_idx = j
+                else:
+                    # 오름차순: 더 작은 값을 찾음
+                    if current_val < extreme_val:
+                        extreme_idx = j
+            
+            # 최소값(또는 최대값)을 현재 위치로 이동
+            data_list[i], data_list[extreme_idx] = data_list[extreme_idx], data_list[i]
+        
+        return pd.DataFrame(data_list)
+    else:
+        # 리스트인 경우
+        data_list = list(data)
+        n = len(data_list)
+        
+        for i in range(n):
+            extreme_idx = i
+            for j in range(i + 1, n):
+                if reverse:
+                    if data_list[j] > data_list[extreme_idx]:
+                        extreme_idx = j
+                else:
+                    if data_list[j] < data_list[extreme_idx]:
+                        extreme_idx = j
+            
+            data_list[i], data_list[extreme_idx] = data_list[extreme_idx], data_list[i]
+        
+        return data_list
+
+# Top K 찾기 (선택 정렬 기반)
+def get_top_k(data, k, key=None, reverse=True):
+    """
+    선택 정렬을 사용하여 Top K 항목 찾기
+    Args:
+        data: pandas DataFrame
+        k: 상위 k개
+        key: 정렬 기준 컬럼명
+        reverse: True면 내림차순
+    Returns:
+        상위 k개 DataFrame
+    """
+    if isinstance(data, pd.DataFrame):
+        sorted_data = selection_sort(data, key=key, reverse=reverse)
+        return sorted_data.head(k)
+    return data
 
 # 데이터 파일 경로
 data_path = "data/경찰청_범죄 발생 지역별 통계_20231231.csv"
@@ -69,14 +143,16 @@ if df.empty:
 
 # 메인 분석 섹션
 st.header("📊 지역별 범죄 발생 분석")
+st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
+st.write("범죄 데이터의 자료는 경찰청에서 제공하는 공공데이터입니다.")
 
 # 1. 가장 많이 발생한 지역-범죄 조합
 st.subheader("🔥 가장 많이 발생한 지역-범죄 조합 Top 10")
 
 # 지역별, 범죄 유형별 집계
 if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in df.columns:
-    # 가장 많이 발생한 조합 찾기
-    top_combinations = df.nlargest(10, '발생건수')[['지역', '범죄유형', '발생건수']]
+    # 가장 많이 발생한 조합 찾기 (선택 정렬 알고리즘 사용)
+    top_combinations = get_top_k(df[['지역', '범죄유형', '발생건수']], k=10, key='발생건수', reverse=True)
     
     # 순위 추가
     top_combinations = top_combinations.reset_index(drop=True)
@@ -100,7 +176,9 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     
     # 2. 지역별 총 범죄 발생 건수
     st.subheader("📍 지역별 총 범죄 발생 건수")
-    region_total = df.groupby('지역')['발생건수'].sum().sort_values(ascending=False)
+    region_grouped = df.groupby('지역')['발생건수'].sum().reset_index()
+    region_sorted = selection_sort(region_grouped, key='발생건수', reverse=True)
+    region_total = region_sorted.set_index('지역')['발생건수']
     
     col1, col2 = st.columns(2)
     
@@ -119,7 +197,9 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     
     # 3. 범죄 유형별 총 발생 건수
     st.subheader("⚖️ 범죄 유형별 총 발생 건수")
-    crime_total = df.groupby('범죄유형')['발생건수'].sum().sort_values(ascending=False)
+    crime_grouped = df.groupby('범죄유형')['발생건수'].sum().reset_index()
+    crime_sorted = selection_sort(crime_grouped, key='발생건수', reverse=True)
+    crime_total = crime_sorted.set_index('범죄유형')['발생건수']
     
     col1, col2 = st.columns(2)
     
@@ -166,10 +246,14 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     col1, col2 = st.columns(2)
     
     with col1:
-        selected_region = st.selectbox("지역 선택", ['전체'] + sorted(df['지역'].unique().tolist()))
+        regions = df['지역'].unique().tolist()
+        sorted_regions = selection_sort(regions, reverse=False)
+        selected_region = st.selectbox("지역 선택", ['전체'] + sorted_regions)
     
     with col2:
-        selected_crime = st.selectbox("범죄 유형 선택", ['전체'] + sorted(df['범죄유형'].unique().tolist()))
+        crimes = df['범죄유형'].unique().tolist()
+        sorted_crimes = selection_sort(crimes, reverse=False)
+        selected_crime = st.selectbox("범죄 유형 선택", ['전체'] + sorted_crimes)
     
     filtered_df = df.copy()
     
@@ -180,7 +264,8 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         filtered_df = filtered_df[filtered_df['범죄유형'] == selected_crime]
     
     if len(filtered_df) > 0:
-        st.dataframe(filtered_df.sort_values('발생건수', ascending=False), use_container_width=True)
+        sorted_filtered = selection_sort(filtered_df, key='발생건수', reverse=True)
+        st.dataframe(sorted_filtered, use_container_width=True)
         
         if len(filtered_df) > 1:
             fig5 = px.bar(
