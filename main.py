@@ -4,7 +4,7 @@ import plotly.express as px
 
 st.title("범죄 지역 찾기")
 st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
-st.write("범죄 데이터의 자료는 경찰청에서 제공하는 공공데이터입니다.")
+st.write("이 범죄 데이터는 2023년 기준 경찰청에서 집계한 범죄 발생 지역별 통계를 제공하는 공공데이터입니다. 외국인 범죄자에 대해서는 국적별(중국, 베트남, 러시아 등) 범죄 발생 수치도 포함됩니다.")
 
 # 선택 정렬 알고리즘 구현
 def selection_sort(data, key=None, reverse=False):
