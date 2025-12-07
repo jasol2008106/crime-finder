@@ -22,7 +22,7 @@ def selection_sort(data, key=None, reverse=False):
         data_list = data.to_dict('records')
         n = len(data_list)
         
-        for i in range(n):
+        for i in range(n - 1):
             # 현재 위치부터 끝까지 최소값(또는 최대값) 찾기
             extreme_idx = i
             for j in range(i + 1, n):
@@ -51,7 +51,7 @@ def selection_sort(data, key=None, reverse=False):
         data_list = list(data)
         n = len(data_list)
         
-        for i in range(n):
+        for i in range(n - 1):
             extreme_idx = i
             for j in range(i + 1, n):
                 if reverse:
