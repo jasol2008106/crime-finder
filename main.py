@@ -158,7 +158,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     top_combinations = top_combinations.reset_index(drop=True)
     top_combinations.index = top_combinations.index + 1
     
-    st.dataframe(top_combinations, use_container_width=True)
+    st.dataframe(top_combinations, width='stretch')
     
     # 시각화
     fig = px.bar(
@@ -172,7 +172,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         height=500
     )
     fig.update_layout(yaxis={'categoryorder': 'total ascending'})
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
     
     # 2. 지역별 총 범죄 발생 건수
     st.subheader("📍 지역별 총 범죄 발생 건수")
@@ -183,7 +183,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     col1, col2 = st.columns(2)
     
     with col1:
-        st.dataframe(region_total.reset_index(), use_container_width=True)
+        st.dataframe(region_total.reset_index(), width='stretch')
     
     with col2:
         fig2 = px.bar(
@@ -193,7 +193,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
             labels={'x': '지역', 'y': '총 발생 건수'}
         )
         fig2.update_xaxes(tickangle=-45)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
     
     # 3. 범죄 유형별 총 발생 건수
     st.subheader("⚖️ 범죄 유형별 총 발생 건수")
@@ -204,7 +204,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     col1, col2 = st.columns(2)
     
     with col1:
-        st.dataframe(crime_total.reset_index(), use_container_width=True)
+        st.dataframe(crime_total.reset_index(), width='stretch')
     
     with col2:
         fig3 = px.pie(
@@ -212,7 +212,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
             names=crime_total.index,
             title='범죄 유형별 비율'
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
     
     # 4. 상세 분석 테이블
     st.subheader("📋 지역-범죄 유형별 상세 분석")
@@ -226,19 +226,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         fill_value=0
     )
     
-    st.dataframe(pivot_table, use_container_width=True)
-    
-    # 히트맵 시각화
-    fig4 = px.imshow(
-        pivot_table.values,
-        labels=dict(x="범죄 유형", y="지역", color="발생 건수"),
-        x=pivot_table.columns,
-        y=pivot_table.index,
-        aspect="auto",
-        color_continuous_scale="Reds",
-        title="지역별 범죄 유형 히트맵"
-    )
-    st.plotly_chart(fig4, use_container_width=True)
+    st.dataframe(pivot_table, width='stretch')
     
     # 5. 검색 기능
     st.subheader("🔍 특정 지역 또는 범죄 유형 검색")
@@ -265,7 +253,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     
     if len(filtered_df) > 0:
         sorted_filtered = selection_sort(filtered_df, key='발생건수', reverse=True)
-        st.dataframe(sorted_filtered, use_container_width=True)
+        st.dataframe(sorted_filtered, width='stretch')
         
         if len(filtered_df) > 1:
             fig5 = px.bar(
@@ -275,7 +263,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
                 color='범죄유형' if selected_region != '전체' else '지역',
                 title=f'검색 결과: {selected_region} - {selected_crime}'
             )
-            st.plotly_chart(fig5, use_container_width=True)
+            st.plotly_chart(fig5, width='stretch')
     else:
         st.info("검색 결과가 없습니다.")
     
