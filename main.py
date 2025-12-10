@@ -65,6 +65,183 @@ def selection_sort(data, key=None, reverse=False):
         
         return data_list
 
+def bubble_sort(data, key=None, reverse=False):
+    """
+    버블 정렬 알고리즘
+    Args:
+        data: 정렬할 리스트 또는 pandas DataFrame
+        key: 정렬 기준이 되는 키 함수 (DataFrame의 경우 컬럼명)
+        reverse: True면 내림차순, False면 오름차순
+    Returns:
+        정렬된 리스트 또는 DataFrame
+    """
+    if isinstance(data, pd.DataFrame):
+        data_list = data.to_dict('records')
+        n = len(data_list)
+
+        for i in range(n - 1):
+            for j in range(n - i - 1):
+                if key:
+                    current_val = data_list[j][key]
+                    next_val = data_list[j + 1][key]
+                else:
+                    current_val = data_list[j]
+                    next_val = data_list[j + 1]
+
+                if reverse:
+                    if current_val > next_val:
+                        data_list[j], data_list[j + 1] = data_list[j + 1], data_list[j]
+                else:
+                    if current_val < next_val:
+                        data_list[j], data_list[j + 1] = data_list[j + 1], data_list[j]
+        return pd.DataFrame(data_list)
+    else:
+        data_list = list(data)
+        n = len(data_list)
+
+        for i in range(n - 1):
+            for j in range(n - i - 1):
+                if reverse:
+                    if data_list[j] > data_list[j + 1]:
+                        data_list[j], data_list[j + 1] = data_list[j + 1], data_list[j]
+                else:
+                    if data_list[j] < data_list[j + 1]:
+                        data_list[j], data_list[j + 1] = data_list[j + 1], data_list[j]
+        return data_list
+
+def insertion_sort(data, key=None, reverse=False):
+    """
+    삽입 정렬 알고리즘
+    Args:
+        data: 정렬할 리스트 또는 pandas DataFrame
+        key: 정렬 기준이 되는 키 함수 (DataFrame의 경우 컬럼명)
+        reverse: True면 내림차순, False면 오름차순
+    Returns:
+        정렬된 리스트 또는 DataFrame
+    """
+    if isinstance(data, pd.DataFrame):
+        data_list = data.to_dict('records')
+        n = len(data_list)
+
+        for i in range(1, n):
+            for j in range(i, 0, -1):
+                if key:
+                    if reverse:
+                        if data_list[j][key] > data_list[j - 1][key]:
+                            data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                        else:
+                            break
+                    else:
+                        if data_list[j][key] < data_list[j - 1][key]:
+                            data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                        else:
+                            break
+                else:
+                    if reverse:
+                        if data_list[j] > data_list[j - 1]:
+                            data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                        else:
+                            break
+                    else:
+                        if data_list[j] < data_list[j - 1]:
+                            data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                        else:
+                            break
+        return pd.DataFrame(data_list)
+    else:
+        data_list = list(data)
+        n = len(data_list)
+
+        for i in range(1, n):
+            for j in range(i, 0, -1):
+                if reverse:
+                    if data_list[j] > data_list[j - 1]:
+                        data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                    else:
+                        break
+                else:
+                    if data_list[j] < data_list[j - 1]:
+                        data_list[j], data_list[j - 1] = data_list[j - 1], data_list[j]
+                    else:
+                        break
+        
+        return data_list
+
+def quick_sort(data, key=None, reverse=False):
+    """
+    퀵 정렬 알고리즘
+    Args:
+        data: 정렬할 리스트 또는 pandas DataFrame
+        key: 정렬 기준이 되는 키 함수 (DataFrame의 경우 컬럼명)
+        reverse: True면 내림차순, False면 오름차순
+    Returns:
+        정렬된 리스트 또는 DataFrame
+    """
+    if isinstance(data, pd.DataFrame):
+        data_list = data.to_dict('records')
+        n = len(data_list)
+
+        if n <= 1:
+            return data_list
+        
+        start = 0
+        end = n - 1
+        pivot = start
+        
+        left = start + 1
+        right = end
+        
+        while left <= right:
+            while left <= right and data_list[left][key] <= data_list[pivot][key]:
+                left += 1
+            while left <= right and data_list[right][key] >= data_list[pivot][key]:
+                right -= 1
+            if left <= right:
+                data_list[left], data_list[right] = data_list[right], data_list[left]
+        
+        data_list[pivot], data_list[right] = data_list[right], data_list[pivot]
+        return quick_sort(data_list[:right], key, reverse) + [data_list[right]] + quick_sort(data_list[right + 1:], key, reverse)
+    else:
+        data_list = list(data)
+        n = len(data_list)
+
+        if n <= 1:
+            return data_list
+
+        start = 0
+        end = n - 1
+        pivot = start
+        
+        left = start + 1
+        right = end
+
+        # escape when left > right
+        while left <= right:
+            if reverse: # reverse
+                # find MIN(less than pivot)
+                while left <= right and data_list[left] >= data_list[pivot]:
+                    left += 1
+                
+                # find MAX(greater than pivot)
+                while left <= right and data_list[right] <= data_list[pivot]:
+                    right -= 1
+            else:
+                # find MAX(greater than pivot)
+                while left <= right and data_list[left] <= data_list[pivot]:
+                    left += 1
+                
+                # find MIN(less than pivot)
+                while left <= right and data_list[right] >= data_list[pivot]:
+                    right -= 1
+            
+            # swap MAX and MIN
+            if left <= right:
+                data_list[left], data_list[right] = data_list[right], data_list[left]
+            
+        # swap pivot and MIN if reverse swap pivot and MAX
+        data_list[pivot], data_list[right] = data_list[right], data_list[pivot]
+        return quick_sort(data_list[:right], key, reverse) + [data_list[right]] + quick_sort(data_list[(right + 1):], key, reverse)
+
 # Top K 찾기 (선택 정렬 기반)
 def get_top_k(data, k, key=None, reverse=True):
     """
