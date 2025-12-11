@@ -1,10 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import time
 
-st.title("범죄 지역 찾기")
-st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
-st.write("이 범죄 데이터는 2023년 기준 경찰청에서 집계한 범죄 발생 지역별 통계를 제공하는 공공데이터입니다. 외국인 범죄자에 대해서는 국적별(중국, 베트남, 러시아 등) 범죄 발생 수치도 포함됩니다.")
 
 # 선택 정렬 알고리즘 구현
 def selection_sort(data, key=None, reverse=False):
@@ -178,30 +176,32 @@ def quick_sort(data, key=None, reverse=False):
         정렬된 리스트 또는 DataFrame
     """
     if isinstance(data, pd.DataFrame):
-        data_list = data.to_dict('records')
-        n = len(data_list)
+        def _quick_sort(data_list: dict, key=None, reverse=False) -> dict:
+            n = len(data_list)
 
-        if n <= 1:
-            return data_list
-        
-        start = 0
-        end = n - 1
-        pivot = start
-        
-        left = start + 1
-        right = end
-        
-        while left <= right:
-            while left <= right and data_list[left][key] <= data_list[pivot][key]:
-                left += 1
-            while left <= right and data_list[right][key] >= data_list[pivot][key]:
-                right -= 1
-            if left <= right:
-                data_list[left], data_list[right] = data_list[right], data_list[left]
-        
-        data_list[pivot], data_list[right] = data_list[right], data_list[pivot]
-        return quick_sort(data_list[:right], key, reverse) + [data_list[right]] + quick_sort(data_list[right + 1:], key, reverse)
-    else:
+            if n <= 1:
+                return data_list
+            
+            start = 0
+            end = n - 1
+            pivot = start
+            
+            left = start + 1
+            right = end
+            
+            while left <= right:
+                while left <= right and data_list[left][key] <= data_list[pivot][key]:
+                    left += 1
+                while left <= right and data_list[right][key] >= data_list[pivot][key]:
+                    right -= 1
+                if left <= right:
+                    data_list[left], data_list[right] = data_list[right], data_list[left]
+            
+            data_list[pivot], data_list[right] = data_list[right], data_list[pivot]
+            return _quick_sort(data_list[:right], key, reverse) + [data_list[right]] + _quick_sort(data_list[(right + 1):], key, reverse)
+
+        return pd.DataFrame(_quick_sort(data.to_dict('records'), key, reverse))
+    else: # TODO FIX ^^
         data_list = list(data)
         n = len(data_list)
 
@@ -320,7 +320,21 @@ if df.empty:
     st.error("데이터를 불러올 수 없습니다.")
     st.stop()
 
+###############################
+
+ ######  #####  ######  #######
+#       #     # #     # #
+#       #     # #     # #######
+#       #     # #     # #
+ ######  #####  ######  #######
+
+###############################
 # 메인 분석 섹션
+st.title("범죄 지역 찾기")
+st.write("이 사이트의 목적은 지역별 범죄 발생 건수를 분석하고 시각화하는 것입니다.")
+st.write("이 범죄 데이터는 2023년 기준 경찰청에서 집계한 범죄 발생 지역별 통계를 제공하는 공공데이터입니다. \
+    \n외국인 범죄자에 대해서는 국적별(중국, 베트남, 러시아 등) 범죄 발생 수치도 포함됩니다.")
+
 st.header("📊 지역별 범죄 발생 분석")
 
 # 1. 가장 많이 발생한 지역-범죄 조합
@@ -351,8 +365,64 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     fig.update_layout(yaxis={'categoryorder': 'total ascending'})
     st.plotly_chart(fig, width='stretch')
     
+###############################################################################################
+
     # 2. 지역별 총 범죄 발생 건수
     st.subheader("📍 지역별 총 범죄 발생 건수")
+
+    st.write("Quick sort: ")
+    t0 = time.time()
+    quick_sort(df['지역'].unique().tolist(), reverse = False)
+    t1 = time.time()
+    quick_sort(df['지역'].unique().tolist(), reverse = True)
+    t2 = time.time()
+    quick_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = False)
+    t3 = time.time()
+    quick_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
+    t4 = time.time()
+    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+
+    st.write("Selection sort: ")
+    t0 = time.time()
+    selection_sort(df['지역'].unique().tolist(), reverse = False)
+    t1 = time.time()
+    selection_sort(df['지역'].unique().tolist(), reverse = True)
+    t2 = time.time()
+    selection_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = False)
+    t3 = time.time()
+    selection_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
+    t4 = time.time()
+    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    
+    st.write("Insertion sort: ")
+    t0 = time.time()
+    insertion_sort(df['지역'].unique().tolist(), reverse = False)
+    t1 = time.time()
+    insertion_sort(df['지역'].unique().tolist(), reverse = True)
+    t2 = time.time()
+    insertion_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = False)
+    t3 = time.time()
+    insertion_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
+    t4 = time.time()
+    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    
+    st.write("Bubble sort: ")
+    t0 = time.time()
+    bubble_sort(df['지역'].unique().tolist(), reverse = False)
+    t1 = time.time()
+    bubble_sort(df['지역'].unique().tolist(), reverse = True)
+    t2 = time.time()
+    bubble_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = False)
+    t3 = time.time()
+    bubble_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
+    t4 = time.time()
+    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    
+    
     region_grouped = df.groupby('지역')['발생건수'].sum().reset_index()
     region_sorted = selection_sort(region_grouped, key='발생건수', reverse=True)
     region_total = region_sorted.set_index('지역')['발생건수']
@@ -372,6 +442,8 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         fig2.update_xaxes(tickangle=-45)
         st.plotly_chart(fig2, width='stretch')
     
+#############################################################################################
+
     # 3. 범죄 유형별 총 발생 건수
     st.subheader("⚖️ 범죄 유형별 총 발생 건수")
     crime_grouped = df.groupby('범죄유형')['발생건수'].sum().reset_index()
@@ -391,6 +463,8 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         )
         st.plotly_chart(fig3, width='stretch')
     
+########################################################################################
+
     # 4. 상세 분석 테이블
     st.subheader("📋 지역-범죄 유형별 상세 분석")
     
@@ -405,6 +479,8 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     
     st.dataframe(pivot_table, width='stretch')
     
+#########################################################################################
+
     # 5. 검색 기능
     st.subheader("🔍 특정 지역 또는 범죄 유형 검색")
     
