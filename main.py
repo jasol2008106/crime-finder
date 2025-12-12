@@ -390,7 +390,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t4 = time.time()
     st.write(f"Quick sort\
         \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
     delta_time_list[0][0][0] = [t1 - t0, list, False]
     delta_time_list[0][0][1] = [t2 - t1, list, True]
     delta_time_list[0][0][2] = [t3 - t2, pd.DataFrame, False]
@@ -408,7 +408,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t4 = time.time()
     st.write(f"Selection sort\
         \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
     delta_time_list[1][0][0] = [t1 - t0, list, False]
     delta_time_list[1][0][1] = [t2 - t1, list, True]
     delta_time_list[1][0][2] = [t3 - t2, pd.DataFrame, False]
@@ -426,7 +426,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t4 = time.time()
     st.write(f"Insertion sort\
         \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
     delta_time_list[2][0][0] = [t1 - t0, list, False]
     delta_time_list[2][0][1] = [t2 - t1, list, True]
     delta_time_list[2][0][2] = [t3 - t2, pd.DataFrame, False]
@@ -444,7 +444,7 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t4 = time.time()
     st.write(f"Bubble sort\
         \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
     delta_time_list[3][0][0] = [t1 - t0, list, False]
     delta_time_list[3][0][1] = [t2 - t1, list, True]
     delta_time_list[3][0][2] = [t3 - t2, pd.DataFrame, False]
@@ -470,9 +470,9 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
         for which_what_sort in sort_type[0]: # which ~ = Level 3
             out_str += str_name
             if which_what_sort[1] is list:
-                out_str += '로 ' + '긴 리스트를'
+                out_str += '로 ' + '리스트를'
             elif which_what_sort[1] is pd.DataFrame:
-                out_str += '로 ' + '짧은 데이터를'
+                out_str += '로 ' + '데이터를'
             else:
                 out_str += '[정렬 타입 에러]'
             
