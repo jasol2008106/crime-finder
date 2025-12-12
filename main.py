@@ -370,7 +370,15 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     # 2. 지역별 총 범죄 발생 건수
     st.subheader("📍 지역별 총 범죄 발생 건수")
 
-    st.write("Quick sort: ")
+    # (ㄱ) -> (ㄴ)는 내가 함. 그 외에도 Quick sort 내가 함. 그 외에는 거의 AI. (ㄱ)
+    delta_time_list = [[[[0, list, False] for _ in range(4)], 'sort_name'] for _ in range(4)]
+    # 위에 저 변수 도대체 무엇이냐? 아래에 설명하겠다. (이거 그냥 온공 제출용이고 누군가 이 프로젝트를 쓸지 모르겠지만 있어 보이니까)
+    # level: 0 | var = [A, B, C, D] 이때 A, B, C, D는 각각 네 개(Q, S, I, B)의 정렬한 결과를 모으기 위함.
+    # Level: 1 | A = [sort_result, sort_name] sort_result는 정렬 방법에서 정렬한 결과, sort_name은 정렬 방법 이름임.
+    # Level: 2 | sort_result = [a, b, c, d] a, b, c, d는 한 정렬 방법으로 정렬한 정렬 결과임.
+    # Level: 3 | a = [d_t, data_type, reverse] d_t는 정렬 시간, data_type은 정렬할 데이터의 종류가 무엇인지 reverse는 내림차순 또는오름차순으로 정렬하였는지 나타냄.
+
+    delta_time_list[0][1] = 'quick'
     t0 = time.time()
     quick_sort(df['지역'].unique().tolist(), reverse = False)
     t1 = time.time()
@@ -380,10 +388,15 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t3 = time.time()
     quick_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
     t4 = time.time()
-    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    st.write(f"Quick sort\
+        \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    delta_time_list[0][0][0] = [t1 - t0, list, False]
+    delta_time_list[0][0][1] = [t2 - t1, list, True]
+    delta_time_list[0][0][2] = [t3 - t2, pd.DataFrame, False]
+    delta_time_list[0][0][3] = [t4 - t3, pd.DataFrame, True]
 
-    st.write("Selection sort: ")
+    delta_time_list[1][1] = 'selection'
     t0 = time.time()
     selection_sort(df['지역'].unique().tolist(), reverse = False)
     t1 = time.time()
@@ -393,10 +406,15 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t3 = time.time()
     selection_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
     t4 = time.time()
-    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    st.write(f"Selection sort\
+        \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    delta_time_list[1][0][0] = [t1 - t0, list, False]
+    delta_time_list[1][0][1] = [t2 - t1, list, True]
+    delta_time_list[1][0][2] = [t3 - t2, pd.DataFrame, False]
+    delta_time_list[1][0][3] = [t4 - t3, pd.DataFrame, True]
     
-    st.write("Insertion sort: ")
+    delta_time_list[2][1] = 'insertion'
     t0 = time.time()
     insertion_sort(df['지역'].unique().tolist(), reverse = False)
     t1 = time.time()
@@ -406,10 +424,15 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t3 = time.time()
     insertion_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
     t4 = time.time()
-    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
-    
-    st.write("Bubble sort: ")
+    st.write(f"Insertion sort\
+        \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    delta_time_list[2][0][0] = [t1 - t0, list, False]
+    delta_time_list[2][0][1] = [t2 - t1, list, True]
+    delta_time_list[2][0][2] = [t3 - t2, pd.DataFrame, False]
+    delta_time_list[2][0][3] = [t4 - t3, pd.DataFrame, True]
+
+    delta_time_list[3][1] = 'bubble'
     t0 = time.time()
     bubble_sort(df['지역'].unique().tolist(), reverse = False)
     t1 = time.time()
@@ -419,10 +442,54 @@ if '지역' in df.columns and '범죄유형' in df.columns and '발생건수' in
     t3 = time.time()
     bubble_sort(df.groupby('지역')['발생건수'].sum().reset_index(), key='발생건수', reverse = True)
     t4 = time.time()
-    st.write(f"list를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
-        \n데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
-    
-    
+    st.write(f"Bubble sort\
+        \nlist를 정렬할 때) 오름차순: {t1 - t0}, 내림차순: {t2 - t1}\
+        \n작은 데이터를 정렬할 때) 오름차순: {t3 - t2}, 내림차순: {t4 - t3}")
+    delta_time_list[3][0][0] = [t1 - t0, list, False]
+    delta_time_list[3][0][1] = [t2 - t1, list, True]
+    delta_time_list[3][0][2] = [t3 - t2, pd.DataFrame, False]
+    delta_time_list[3][0][3] = [t4 - t3, pd.DataFrame, True]
+
+    sort_data = dict()
+
+    for sort_type in delta_time_list: # sort_type = Level 1
+        out_str = ''
+        str_name = ''
+
+        if sort_type[1] == 'quick':
+            str_name = '퀵 정렬'
+        elif sort_type[1] == 'selection':
+            str_name = '선택 정렬'
+        elif sort_type[1] == 'insertion':
+            str_name = '삽입 정렬'
+        elif sort_type[1] == 'bubble':
+            str_name = '버블 정렬'
+        else:
+            str_name = '[정렬 이름 에러]'
+        
+        for which_what_sort in sort_type[0]: # which ~ = Level 3
+            out_str += str_name
+            if which_what_sort[1] is list:
+                out_str += '로 ' + '긴 리스트를'
+            elif which_what_sort[1] is pd.DataFrame:
+                out_str += '로 ' + '짧은 데이터를'
+            else:
+                out_str += '[정렬 타입 에러]'
+            
+            if not which_what_sort[2]:
+                out_str += ' 오름차순으로 정렬 할 때: '
+            else:
+                out_str += ' 내림차순으로 정렬 할 때: '
+
+            out_str += str(which_what_sort[0])
+            sort_data[which_what_sort[0]] = out_str
+            out_str = ''
+            
+    # st.write(sort_data)
+    for key in sorted(sort_data.keys()):
+        st.write(sort_data[key])
+    # (ㄴ) 힘들었다.
+
     region_grouped = df.groupby('지역')['발생건수'].sum().reset_index()
     region_sorted = selection_sort(region_grouped, key='발생건수', reverse=True)
     region_total = region_sorted.set_index('지역')['발생건수']
